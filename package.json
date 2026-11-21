@@ -8,7 +8,8 @@
     "start": "node src/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:demo": "node src/db/demo.js"
+    "db:studio": "drizzle-kit studio",
+    "db:demo":"node src/db/demo.js" 
   },
   "keywords": [],
   "author": "",

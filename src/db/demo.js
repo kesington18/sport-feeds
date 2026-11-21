@@ -1,69 +1,70 @@
-import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { db, pool } from './db.js';
-import { demoUsers } from './schema.js';
+import { matches } from './schema.js';
 
 async function runCrudDemo() {
-  let insertedUserId;
+  let insertedMatchId;
 
   try {
     console.log('Performing CRUD operations...');
 
-    const [newUser] = await db
-      .insert(demoUsers)
+    const [newMatch] = await db
+      .insert(matches)
       .values({
-        name: 'Admin User',
-        email: `admin-${randomUUID()}@example.com`,
+        sport: 'football',
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        startTime: new Date(),
       })
       .returning();
 
-    if (!newUser) {
-      throw new Error('Failed to create user.');
+    if (!newMatch) {
+      throw new Error('Failed to create match.');
     }
 
-    insertedUserId = newUser.id;
-    console.log('CREATE:', newUser);
+    insertedMatchId = newMatch.id;
+    console.log('CREATE:', newMatch);
 
-    const [foundUser] = await db
+    const [foundMatch] = await db
       .select()
-      .from(demoUsers)
-      .where(eq(demoUsers.id, newUser.id))
+      .from(matches)
+      .where(eq(matches.id, newMatch.id))
       .limit(1);
 
-    if (!foundUser) {
-      throw new Error('Failed to find the created user.');
+    if (!foundMatch) {
+      throw new Error('Failed to find the created match.');
     }
 
-    console.log('READ:', foundUser);
+    console.log('READ:', foundMatch);
 
-    const [updatedUser] = await db
-      .update(demoUsers)
-      .set({ name: 'Super Admin' })
-      .where(eq(demoUsers.id, newUser.id))
+    const [updatedMatch] = await db
+      .update(matches)
+      .set({ status: 'live', homeScore: 1 })
+      .where(eq(matches.id, newMatch.id))
       .returning();
 
-    if (!updatedUser) {
-      throw new Error('Failed to update user.');
+    if (!updatedMatch) {
+      throw new Error('Failed to update match.');
     }
 
-    console.log('UPDATE:', updatedUser);
+    console.log('UPDATE:', updatedMatch);
 
-    const [deletedUser] = await db
-      .delete(demoUsers)
-      .where(eq(demoUsers.id, newUser.id))
-      .returning({ id: demoUsers.id });
+    const [deletedMatch] = await db
+      .delete(matches)
+      .where(eq(matches.id, newMatch.id))
+      .returning({ id: matches.id });
 
-    if (!deletedUser) {
-      throw new Error('Failed to delete user.');
+    if (!deletedMatch) {
+      throw new Error('Failed to delete match.');
     }
 
-    insertedUserId = undefined;
-    console.log('DELETE: User deleted.');
+    insertedMatchId = undefined;
+    console.log('DELETE: Match deleted.');
     console.log('CRUD operations completed successfully.');
   } finally {
     try {
-      if (insertedUserId !== undefined) {
-        await db.delete(demoUsers).where(eq(demoUsers.id, insertedUserId));
+      if (insertedMatchId !== undefined) {
+        await db.delete(matches).where(eq(matches.id, insertedMatchId));
       }
     } finally {
       await pool.end();
@@ -75,3 +76,4 @@ runCrudDemo().catch((error) => {
   console.error('Error performing CRUD operations:', error);
   process.exitCode = 1;
 });
+ 
