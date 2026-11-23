@@ -26,8 +26,8 @@ export const createMatchSchema = z
     awayTeam: z.string().min(1),
     startTime: isoDateTimeSchema,
     endTime: isoDateTimeSchema,
-    homeScore: z.coerce.number().int().nonnegative().optional(),
-    awayScore: z.coerce.number().int().nonnegative().optional(),
+    homeScore: z.number().int().nonnegative().max(2147483647).optional(),
+    awayScore: z.number().int().nonnegative().max(2147483647).optional(),
   })
   .superRefine((match, context) => {
     if (
