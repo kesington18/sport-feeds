@@ -6,11 +6,13 @@ const port = 8000;
 
 app.use(express.json());
 
+app.use('/matches', matchRouter);
+
 app.use('/', (req, res) => {
     res.send('Hello from Express server!');
 });
 
-app.use("/matches", matchRouter);
+app.get("/matches", matchRouter);
 
 app.listen(port, () => {
     console.log("Server is running at http://localhost:" + port);
