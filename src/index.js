@@ -1,8 +1,13 @@
 import express from 'express';
+import http from "http";
 import { matchRouter } from './routes/matches.js';
+import { attachWebsocketServer } from './ws/server.js';
 
+const PORT = Number(process.env.PORT || 8000);
+const HOST = process.env.HOST || "0.0.0.0";
 const app = express();
-const port = 8000;
+
+const server = http.createServer(app);
 
 app.use(express.json());
 
@@ -12,10 +17,14 @@ app.use('/', (req, res) => {
     res.send('Hello from Express server!');
 });
 
-app.get("/matches", matchRouter);
 
-app.listen(port, () => {
-    console.log("Server is running at http://localhost:" + port);
+const { broadcastMatchCreated } = attachWebsocketServer(server);
+app.locals.broadcastMatchCreated = broadcastMatchCreated;
+
+app.listen(PORT, HOST, () => {
+    const baseUrl = HOST === '0.0.0.0' ? "http://localhost:" + PORT : "http://" + HOST + ":" + PORT;
+    console.log("Server is running ON" + baseUrl);
+    console.log("websocket server is running on " + baseUrl.replace("http", "ws") + "/ws");
 });
 
 
